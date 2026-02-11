@@ -1,0 +1,211 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+  StyleSheet,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAuth } from '../context/AuthContext';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../App';
+
+type LoginScreenProps = {
+  navigation: NativeStackNavigationProp<RootStackParamList, 'Login'>;
+};
+
+const TEST_CREDENTIALS = {
+  cnic: '1710110725203',
+  password: '1234567',
+};
+
+const COLORS = {
+  primary: '#2E7D32',
+  primaryLight: '#4CAF50',
+  primaryDark: '#1B5E20',
+  background: '#F1F8E9',
+  card: '#FFFFFF',
+  text: '#1B5E20',
+  textSecondary: '#558B2F',
+  border: '#C8E6C9',
+};
+
+export const LoginScreen = ({ navigation }: LoginScreenProps) => {
+  const [cnic, setCnic] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const insets = useSafeAreaInsets();
+  const { login } = useAuth();
+
+  const handleLogin = async () => {
+    if (cnic.length !== 13) {
+      Alert.alert('Error', 'Please enter a valid 13-digit CNIC');
+      return;
+    }
+
+    if (password.length === 0) {
+      Alert.alert('Error', 'Please enter your password');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const result = await login(cnic, password);
+      setIsLoading(false);
+
+      if (result.success) {
+        // Reset observation state before navigating
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Main' }],
+        });
+      } else {
+        Alert.alert('Error', result.message || 'Login failed');
+      }
+    } catch {
+      setIsLoading(false);
+      Alert.alert('Error', 'An unexpected error occurred');
+    }
+  };
+
+  return (
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={styles.loginCard}>
+        <Text style={styles.loginTitle}>MGCOT</Text>
+        <Text style={styles.loginSubtitle}>Educational Observation System</Text>
+
+        <Text style={styles.label}>Enter CNIC</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="CNIC Number"
+          placeholderTextColor={COLORS.textSecondary}
+          keyboardType="numeric"
+          maxLength={13}
+          value={cnic}
+          onChangeText={setCnic}
+        />
+
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor={COLORS.textSecondary}
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+
+        <TouchableOpacity
+          style={[styles.primaryButton, isLoading && styles.disabledButton]}
+          onPress={handleLogin}
+          disabled={isLoading}
+        >
+          <Text style={styles.primaryButtonText}>
+            {isLoading ? 'Logging in...' : 'Login'}
+          </Text>
+        </TouchableOpacity>
+
+        <Text style={styles.helperText}>
+          Enter your CNIC and password to access your dashboard
+        </Text>
+
+        <View style={styles.dummyCredentials}>
+          <Text style={styles.dummyTitle}>Test Credentials (for testing):</Text>
+          <Text style={styles.dummyText}>CNIC: {TEST_CREDENTIALS.cnic}</Text>
+          <Text style={styles.dummyText}>
+            Password: {TEST_CREDENTIALS.password}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  loginCard: {
+    backgroundColor: COLORS.card,
+    margin: 20,
+    padding: 30,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  loginTitle: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: COLORS.primary,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  loginSubtitle: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    marginBottom: 32,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: COLORS.card,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  primaryButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  disabledButton: {
+    backgroundColor: COLORS.primaryLight,
+  },
+  primaryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  helperText: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    marginTop: 16,
+  },
+  dummyCredentials: {
+    marginTop: 24,
+    padding: 12,
+    backgroundColor: COLORS.background,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  dummyTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  dummyText: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+  },
+});
