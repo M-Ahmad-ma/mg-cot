@@ -1,5 +1,12 @@
 import React from 'react';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
+import {
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+} from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -18,7 +25,13 @@ import {
   SingleGradeDetailsScreen,
   MultiGradeFormScreen,
 } from './src/screens';
-import { ObservationProvider, AuthProvider, useAuth } from './src/context';
+import {
+  ObservationProvider,
+  AuthProvider,
+  useAuth,
+  TimerProvider,
+} from './src/context';
+import { ObservationTimer } from './src/components/ObservationTimer';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -69,6 +82,7 @@ function SetupStack() {
         headerBackVisible: false,
         gestureEnabled: false,
         headerBackButtonMenuEnabled: false,
+        headerRight: () => <ObservationTimer />,
       }}
     >
       <Stack.Screen
@@ -149,6 +163,7 @@ function ObservationFlowStack() {
         headerBackVisible: false,
         gestureEnabled: false,
         headerBackButtonMenuEnabled: false,
+        headerRight: () => <ObservationTimer />,
       }}
     >
       <Stack.Screen
@@ -284,9 +299,11 @@ function App() {
   return (
     <SafeAreaProvider>
       <ObservationProvider>
-        <AuthProvider>
-          <RootNavigator />
-        </AuthProvider>
+        <TimerProvider>
+          <AuthProvider>
+            <RootNavigator />
+          </AuthProvider>
+        </TimerProvider>
       </ObservationProvider>
     </SafeAreaProvider>
   );

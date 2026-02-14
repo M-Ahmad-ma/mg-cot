@@ -14,7 +14,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
-import { useObservation } from '../context';
+import { useObservation, useTimer } from '../context';
 import { useAuth } from '../context/AuthContext';
 import {
   clearObservationState,
@@ -56,6 +56,7 @@ export const DiscussionChecklistScreen = () => {
   const insets = useSafeAreaInsets();
   const { resetObservation } = useObservation();
   const { endObservation } = useAuth();
+  const { stopTimer, getStartTimeISO } = useTimer();
 
   const { noQuestions: initialNoQuestions } = route.params || {};
 
@@ -102,25 +103,21 @@ export const DiscussionChecklistScreen = () => {
       const result = await submitTeacherDiscussion(visitId, { responses });
 
       if (result.success) {
+        const endTime = new Date().toISOString();
+        const startTime = getStartTimeISO();
+        console.log('Observation completed:', { startTime, endTime });
+
+        stopTimer();
         await clearObservationState();
         await resetObservation();
         endObservation();
-
-        Alert.alert(
-          'Observation Complete',
-          'Your observation has been submitted successfully. Would you like to start a new observation?',
-          [
-            {
-              text: 'Yes',
-              onPress: () => {
-                const rootNavigation = navigation.getParent();
-                if (rootNavigation) {
-                  rootNavigation.navigate('Setup');
-                }
-              },
-            },
-          ],
-        );
+        const rootNavigation = navigation.getParent();
+        if (rootNavigation) {
+          rootNavigation.reset({
+            index: 0,
+            routes: [{ name: 'Main' }],
+          });
+        }
       } else {
         Alert.alert(
           'Submission Warning',
@@ -161,25 +158,21 @@ export const DiscussionChecklistScreen = () => {
 
   const completeObservation = async () => {
     try {
+      const endTime = new Date().toISOString();
+      const startTime = getStartTimeISO();
+      console.log('Observation completed:', { startTime, endTime });
+
+      stopTimer();
       await clearObservationState();
       await resetObservation();
       endObservation();
-
-      Alert.alert(
-        'Observation Complete',
-        'Your observation has been submitted successfully. Would you like to start a new observation?',
-        [
-          {
-            text: 'Yes',
-            onPress: () => {
-              const rootNavigation = navigation.getParent();
-              if (rootNavigation) {
-                rootNavigation.navigate('Setup');
-              }
-            },
-          },
-        ],
-      );
+      const rootNavigation = navigation.getParent();
+      if (rootNavigation) {
+        rootNavigation.reset({
+          index: 0,
+          routes: [{ name: 'Main' }],
+        });
+      }
     } catch (error) {
       console.error('Error completing observation:', error);
       Alert.alert(
@@ -191,7 +184,10 @@ export const DiscussionChecklistScreen = () => {
             onPress: () => {
               const rootNavigation = navigation.getParent();
               if (rootNavigation) {
-                rootNavigation.navigate('Setup');
+                rootNavigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Main' }],
+                });
               }
             },
           },

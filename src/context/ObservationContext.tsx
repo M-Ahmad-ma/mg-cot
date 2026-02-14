@@ -53,6 +53,7 @@ export const ObservationProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     const loadState = async () => {
       const savedState = await getObservationState();
+      console.log('[DEBUG] Loading saved state:', savedState);
       if (savedState) {
         log.info('ObservationContext', 'Loading saved state');
         setIsMultiGrade(savedState.isMultiGrade);
@@ -67,6 +68,11 @@ export const ObservationProvider: React.FC<{ children: ReactNode }> = ({
 
   useEffect(() => {
     if (isLoaded) {
+      console.log('[DEBUG] Saving observation state:', {
+        isMultiGrade,
+        selectedGrade,
+        selectedGrades,
+      });
       saveObservationState({
         isMultiGrade,
         selectedGrade,

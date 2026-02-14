@@ -19,6 +19,7 @@ import {
   clearObservationState,
 } from '../services/api';
 import { callResetObservationState } from '../context/ObservationContext';
+import { useTimer } from '../context/TimerContext';
 
 type ClassroomSelectionProps = {
   navigation: NativeStackNavigationProp<
@@ -48,6 +49,7 @@ export const ClassroomSelectionScreen = ({
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ schoolCode?: string }>({});
   const insets = useSafeAreaInsets();
+  const { startTimer } = useTimer();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -101,6 +103,9 @@ export const ClassroomSelectionScreen = ({
       console.log('Both API calls successful!');
       console.log('School Data:', schoolData);
       console.log('Visit Result:', visitResult);
+
+      // Start the observation timer
+      startTimer();
 
       // Reset observation state to ensure grade selection is shown
       await clearObservationState();
@@ -195,13 +200,6 @@ export const ClassroomSelectionScreen = ({
             {isLoading ? 'Processing...' : 'Start Observation'}
           </Text>
         </TouchableOpacity>
-
-        {/* Loading indicator */}
-        {isLoading && (
-          <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Processing...</Text>
-          </View>
-        )}
       </View>
     </ScrollView>
   );

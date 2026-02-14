@@ -110,12 +110,30 @@ export const ObservationScreen: React.FC = () => {
     (domains: Domain[]) => {
       const expectedType = isMultiGrade ? 'combined' : 'single';
 
+      console.log('[DEBUG] filterAndSetDomains:', {
+        isMultiGrade,
+        expectedType,
+        domainsCount: domains.length,
+        domains: domains.map(d => ({
+          id: d.id,
+          name: d.name,
+          type: d.type,
+          questionsCount: d.questions.length,
+        })),
+      });
+
       const usableDomains = domains.filter(domain => {
         if (domain.type === 'additional') {
           return domain.questions.length > 0;
         }
 
         return domain.type === expectedType && domain.questions.length > 0;
+      });
+
+      console.log('[DEBUG] usableDomains:', {
+        usableDomainsCount: usableDomains.length,
+        usableTypes: [...new Set(usableDomains.map(d => d.type))],
+        usableDomainNames: usableDomains.map(d => d.name),
       });
 
       setFilteredDomains(usableDomains);
@@ -538,46 +556,56 @@ export const ObservationScreen: React.FC = () => {
           </View>
         )}
 
-        {filteredDomains.map(domain => (
-          <View key={domain.id} style={styles.domainSection}>
-            {domain.questions.length === 0 ? (
-              <Text style={styles.noQuestionsText}>
-                No questions for this domain
-              </Text>
-            ) : (
-              domain.questions.map(question => (
-                <View key={question.id} style={styles.scoreCard}>
-                  <Text style={styles.scoreLabel}>
-                    {question.question_description}
-                  </Text>
-                  <View style={styles.scoreButtons}>
-                    {[1, 2, 3, 4, 5].map(score => (
-                      <TouchableOpacity
-                        key={score}
-                        style={[
-                          styles.scoreButton,
-                          scores[question.id] === score &&
-                            styles.scoreButtonSelected,
-                        ]}
-                        onPress={() => updateScore(question.id, score)}
-                      >
-                        <Text
-                          style={[
-                            styles.scoreButtonText,
-                            scores[question.id] === score &&
-                              styles.scoreButtonTextSelected,
-                          ]}
-                        >
-                          {score}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </View>
-              ))
-            )}
+        {filteredDomains.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyTitle}>No Questions Available</Text>
+            <Text style={styles.emptyText}>
+              There are no observation questions available for single grade at
+              this time.
+            </Text>
           </View>
-        ))}
+        ) : (
+          filteredDomains.map(domain => (
+            <View key={domain.id} style={styles.domainSection}>
+              {domain.questions.length === 0 ? (
+                <Text style={styles.noQuestionsText}>
+                  No questions for this domain
+                </Text>
+              ) : (
+                domain.questions.map(question => (
+                  <View key={question.id} style={styles.scoreCard}>
+                    <Text style={styles.scoreLabel}>
+                      {question.question_description}
+                    </Text>
+                    <View style={styles.scoreButtons}>
+                      {[1, 2, 3, 4, 5].map(score => (
+                        <TouchableOpacity
+                          key={score}
+                          style={[
+                            styles.scoreButton,
+                            scores[question.id] === score &&
+                              styles.scoreButtonSelected,
+                          ]}
+                          onPress={() => updateScore(question.id, score)}
+                        >
+                          <Text
+                            style={[
+                              styles.scoreButtonText,
+                              scores[question.id] === score &&
+                                styles.scoreButtonTextSelected,
+                            ]}
+                          >
+                            {score}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                ))
+              )}
+            </View>
+          ))
+        )}
 
         <TouchableOpacity
           style={[
@@ -731,5 +759,25 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  emptyContainer: {
+    backgroundColor: COLORS.card,
+    padding: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptyText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });

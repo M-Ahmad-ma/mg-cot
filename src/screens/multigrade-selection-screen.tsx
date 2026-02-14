@@ -117,6 +117,14 @@ export const MultiGradeSelectionScreen = () => {
         Alert.alert('Error', `Please enter total students for ${grade}`);
         return;
       }
+      const totalPresent = (data.present_girls || 0) + (data.present_boys || 0);
+      if (totalPresent > (data.total_students || 0)) {
+        Alert.alert(
+          'Error',
+          `Present students cannot exceed total students for ${grade}`,
+        );
+        return;
+      }
     }
 
     try {

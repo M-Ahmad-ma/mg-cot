@@ -14,10 +14,10 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
-import { useObservation } from '../context';
+import { useObservation, useTimer } from '../context';
 import { useAuth } from '../context/AuthContext';
 import {
-  submitRatings,
+  submitTeacherDiscussion,
   getVisitId,
   getTeacherDiscussionQuestions,
   clearObservationState,
@@ -51,11 +51,13 @@ export const AdditionalObservationScreen = () => {
   const [questions, setQuestions] = useState<TeacherDiscussionQuestion[]>([]);
   const [answers, setAnswers] = useState<{ [key: number]: boolean | null }>({});
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<AdditionalObservationNavigationProp>();
   const { selectedGrade, selectedGrades, isMultiGrade, resetObservation } =
     useObservation();
   const { endObservation } = useAuth();
+  const { stopTimer, getStartTimeISO } = useTimer();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -116,8 +118,8 @@ export const AdditionalObservationScreen = () => {
     const gradeNames = isMultiGrade
       ? selectedGrades
       : selectedGrade
-      ? [selectedGrade]
-      : [];
+        ? [selectedGrade]
+        : [];
 
     if (gradeNames.length === 0) {
       Alert.alert('Error', 'No grade selected. Please start over.');
@@ -125,43 +127,37 @@ export const AdditionalObservationScreen = () => {
     }
 
     try {
-      setLoading(true);
+      setSubmitting(true);
 
-      const ratings = Object.entries(answers)
+      const responses = Object.entries(answers)
+        .filter(([_, answer]) => answer !== null)
         .map(([questionId, answer]) => ({
           question_id: parseInt(questionId, 10),
-          rating: answer === true ? 5 : answer === false ? 1 : 0,
-          comments: answer === true ? 'Yes' : answer === false ? 'No' : '',
-        }))
-        .filter(r => r.rating > 0);
+          response: answer as boolean,
+        }));
 
-      const result = await submitRatings(visitId, {
-        grade_names: gradeNames,
-        context_type: isMultiGrade ? 'combined' : 'single',
-        ratings,
+      const result = await submitTeacherDiscussion(visitId, {
+        responses,
       });
 
       if (result.success) {
         const noQuestions = getNoQuestions();
         if (noQuestions.length === 0) {
+          const endTime = new Date().toISOString();
+          const startTime = getStartTimeISO();
+          console.log('Observation completed:', { startTime, endTime });
+
+          stopTimer();
           await clearObservationState();
           resetObservation();
           endObservation();
-          Alert.alert(
-            'Observation Complete',
-            'Your observation has been submitted successfully. Would you like to start a new observation?',
-            [
-              {
-                text: 'Yes',
-                onPress: () => {
-                  const rootNavigation = navigation.getParent();
-                  if (rootNavigation) {
-                    rootNavigation.navigate('Setup');
-                  }
-                },
-              },
-            ],
-          );
+          const rootNavigation = navigation.getParent();
+          if (rootNavigation) {
+            rootNavigation.reset({
+              index: 0,
+              routes: [{ name: 'Main' }],
+            });
+          }
         } else {
           navigation.navigate('DiscussionChecklist', {
             noQuestions: noQuestions,
@@ -172,7 +168,7 @@ export const AdditionalObservationScreen = () => {
         Alert.alert(
           'Submission Warning',
           result.message ||
-            'Observation completed but submission failed. Please try again.',
+          'Observation completed but submission failed. Please try again.',
           [
             {
               text: 'Retry',
@@ -198,7 +194,7 @@ export const AdditionalObservationScreen = () => {
         },
       ]);
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -206,6 +202,17 @@ export const AdditionalObservationScreen = () => {
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
+
+  if (submitting) {
+    return (
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={styles.submittingContainer}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+          <Text style={styles.submittingText}>Submitting observation...</Text>
+        </View>
       </View>
     );
   }
@@ -218,14 +225,14 @@ export const AdditionalObservationScreen = () => {
           Answer the following questions
         </Text>
 
-        {loading && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={COLORS.primary} />
-            <Text style={styles.loadingText}>Submitting observation...</Text>
+        {questions.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyTitle}>No Additional Observations</Text>
+            <Text style={styles.emptyText}>
+              There are no additional observation questions at this time.
+            </Text>
           </View>
-        )}
-
-        {!loading &&
+        ) : (
           questions.map((question, index) => (
             <View key={question.id || index} style={styles.binaryCard}>
               <Text style={styles.binaryQuestion}>{question.question}</Text>
@@ -241,7 +248,7 @@ export const AdditionalObservationScreen = () => {
                     style={[
                       styles.binaryButtonText,
                       answers[question.id] === true &&
-                        styles.binaryButtonTextSelected,
+                      styles.binaryButtonTextSelected,
                     ]}
                   >
                     Yes
@@ -258,7 +265,7 @@ export const AdditionalObservationScreen = () => {
                     style={[
                       styles.binaryButtonText,
                       answers[question.id] === false &&
-                        styles.binaryButtonTextSelected,
+                      styles.binaryButtonTextSelected,
                     ]}
                   >
                     No
@@ -266,18 +273,19 @@ export const AdditionalObservationScreen = () => {
                 </TouchableOpacity>
               </View>
             </View>
-          ))}
+          ))
+        )}
 
         <TouchableOpacity
           style={[
             styles.primaryButton,
-            (!isAllAnswered() || loading) && styles.primaryButtonDisabled,
+            (!isAllAnswered() || submitting) && styles.primaryButtonDisabled,
           ]}
           onPress={handleComplete}
-          disabled={!isAllAnswered() || loading}
+          disabled={!isAllAnswered() || submitting}
         >
           <Text style={styles.primaryButtonText}>
-            {loading ? 'Submitting...' : 'Complete Observation'}
+            {submitting ? 'Submitting...' : 'Complete Observation'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -371,5 +379,37 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 14,
     color: COLORS.textSecondary,
+  },
+  emptyContainer: {
+    backgroundColor: COLORS.card,
+    padding: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptyText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  submittingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.background,
+  },
+  submittingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: COLORS.textSecondary,
+    fontWeight: '500',
   },
 });
