@@ -166,13 +166,19 @@ export const DiscussionChecklistScreen = () => {
       await clearObservationState();
       await resetObservation();
       endObservation();
-      const rootNavigation = navigation.getParent();
-      if (rootNavigation) {
-        rootNavigation.reset({
-          index: 0,
-          routes: [{ name: 'Main' }],
-        });
-      }
+
+      Alert.alert(
+        'Observation Complete',
+        'Your observation has been submitted successfully. Would you like to start a new observation?',
+        [
+          {
+            text: 'Yes',
+            onPress: () => {
+              navigation.navigate('Setup');
+            },
+          },
+        ],
+      );
     } catch (error) {
       console.error('Error completing observation:', error);
       Alert.alert(
@@ -198,24 +204,29 @@ export const DiscussionChecklistScreen = () => {
 
   if (noQuestions.length === 0) {
     return (
-      <ScrollView style={[styles.container, { paddingTop: insets.top }]}>
-        <View style={styles.contentContainer}>
-          <Text style={styles.screenTitle}>Discussion Checklist</Text>
-          <Text style={styles.screenSubtitle}>
-            No items to discuss (all questions answered Yes)
-          </Text>
-
-          <TouchableOpacity
-            style={styles.primaryButton}
-            onPress={handleContinue}
-            disabled={loading}
-          >
-            <Text style={styles.primaryButtonText}>
-              {loading ? 'Completing...' : 'Complete Observation'}
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={styles.emptyContainer}>
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyTitle}>Discussion Checklist</Text>
+            <Text style={styles.emptySubtitle}>
+              No items to discuss (all questions answered Yes)
             </Text>
-          </TouchableOpacity>
+            <Text style={styles.emptyText}>
+              There are no discussion items required for this observation.
+            </Text>
+
+            <TouchableOpacity
+              style={styles.primaryButton}
+              onPress={handleContinue}
+              disabled={loading}
+            >
+              <Text style={styles.primaryButtonText}>
+                {loading ? 'Completing...' : 'Complete Observation'}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </ScrollView>
+      </View>
     );
   }
 
@@ -302,6 +313,41 @@ const styles = StyleSheet.create({
   screenSubtitle: {
     fontSize: 14,
     color: COLORS.textSecondary,
+    marginBottom: 20,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyCard: {
+    backgroundColor: COLORS.card,
+    padding: 24,
+    borderRadius: 12,
+    width: '100%',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: COLORS.primary,
+    marginBottom: 8,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
     marginBottom: 20,
   },
   checklistCard: {

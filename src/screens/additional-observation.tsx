@@ -301,6 +301,36 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: 20,
   },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyCard: {
+    backgroundColor: COLORS.card,
+    padding: 24,
+    borderRadius: 12,
+    width: '100%',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: COLORS.text,
+    marginBottom: 12,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
   screenTitle: {
     fontSize: 24,
     fontWeight: 'bold',
