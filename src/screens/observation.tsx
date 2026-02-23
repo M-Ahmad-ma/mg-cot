@@ -110,30 +110,12 @@ export const ObservationScreen: React.FC = () => {
     (domains: Domain[]) => {
       const expectedType = isMultiGrade ? 'combined' : 'single';
 
-      console.log('[DEBUG] filterAndSetDomains:', {
-        isMultiGrade,
-        expectedType,
-        domainsCount: domains.length,
-        domains: domains.map(d => ({
-          id: d.id,
-          name: d.name,
-          type: d.type,
-          questionsCount: d.questions.length,
-        })),
-      });
-
       const usableDomains = domains.filter(domain => {
         if (domain.type === 'additional') {
           return domain.questions.length > 0;
         }
 
         return domain.type === expectedType && domain.questions.length > 0;
-      });
-
-      console.log('[DEBUG] usableDomains:', {
-        usableDomainsCount: usableDomains.length,
-        usableTypes: [...new Set(usableDomains.map(d => d.type))],
-        usableDomainNames: usableDomains.map(d => d.name),
       });
 
       setFilteredDomains(usableDomains);
@@ -151,7 +133,7 @@ export const ObservationScreen: React.FC = () => {
         filterAndSetDomains(res.data);
       }
     } catch (e) {
-      console.error('Error fetching domains', e);
+      // Domain fetch failed
     } finally {
       setLoading(false);
     }
@@ -190,7 +172,7 @@ export const ObservationScreen: React.FC = () => {
         setScores(ratingsMap);
       }
     } catch (e) {
-      console.error('Error fetching previous ratings', e);
+      // Previous ratings fetch failed, continue anyway
     }
   }, [isMultiGrade, selectedGrade, selectedGrades]);
 
@@ -330,7 +312,6 @@ export const ObservationScreen: React.FC = () => {
         );
       }
     } catch (error) {
-      console.error('Error submitting ratings:', error);
       Alert.alert(
         'Error',
         'An unexpected error occurred. Do you want to continue anyway?',
@@ -367,17 +348,6 @@ export const ObservationScreen: React.FC = () => {
    */
 
   // ⬇️ Your existing JSX rendering continues here unchanged
-
-  console.log('[Debug] ObservationScreen render:', {
-    isMultiGrade,
-    selectedGrade,
-    selectedGradesCount: selectedGrades.length,
-    gradesDataLength: gradesData.length,
-    contextLoaded,
-    contextLoading,
-    loading,
-    filteredDomainsLength: filteredDomains.length,
-  });
 
   if (contextLoading || loading) {
     return (

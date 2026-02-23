@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -56,13 +56,11 @@ export const DiscussionChecklistScreen = () => {
   const insets = useSafeAreaInsets();
   const { resetObservation } = useObservation();
   const { endObservation } = useAuth();
-  const { stopTimer, getStartTimeISO } = useTimer();
+  const { stopTimer } = useTimer();
 
   const { noQuestions: initialNoQuestions } = route.params || {};
 
-  const [noQuestions, setNoQuestions] = useState<NoQuestion[]>(
-    initialNoQuestions || [],
-  );
+  const [noQuestions] = useState<NoQuestion[]>(initialNoQuestions || []);
   const [discussed, setDiscussed] = useState<{ [key: number]: boolean }>({});
   const [loading, setLoading] = useState(false);
 
@@ -103,21 +101,24 @@ export const DiscussionChecklistScreen = () => {
       const result = await submitTeacherDiscussion(visitId, { responses });
 
       if (result.success) {
-        const endTime = new Date().toISOString();
-        const startTime = getStartTimeISO();
-        console.log('Observation completed:', { startTime, endTime });
-
-        stopTimer();
-        await clearObservationState();
-        await resetObservation();
-        endObservation();
-        const rootNavigation = navigation.getParent();
-        if (rootNavigation) {
-          rootNavigation.reset({
-            index: 0,
-            routes: [{ name: 'Main' }],
-          });
-        }
+        Alert.alert('Success', 'Discussion submitted successfully!', [
+          {
+            text: 'OK',
+            onPress: async () => {
+              stopTimer();
+              await clearObservationState();
+              await resetObservation();
+              endObservation();
+              const rootNavigation = navigation.getParent();
+              if (rootNavigation) {
+                rootNavigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Main' }],
+                });
+              }
+            },
+          },
+        ]);
       } else {
         Alert.alert(
           'Submission Warning',
@@ -135,8 +136,7 @@ export const DiscussionChecklistScreen = () => {
           ],
         );
       }
-    } catch (error) {
-      console.error('Error submitting discussion:', error);
+    } catch {
       Alert.alert(
         'Error',
         'An unexpected error occurred. Do you want to continue anyway?',
@@ -158,10 +158,6 @@ export const DiscussionChecklistScreen = () => {
 
   const completeObservation = async () => {
     try {
-      const endTime = new Date().toISOString();
-      const startTime = getStartTimeISO();
-      console.log('Observation completed:', { startTime, endTime });
-
       stopTimer();
       await clearObservationState();
       await resetObservation();
@@ -179,8 +175,7 @@ export const DiscussionChecklistScreen = () => {
           },
         ],
       );
-    } catch (error) {
-      console.error('Error completing observation:', error);
+    } catch {
       Alert.alert(
         'Error',
         'There was an error completing the observation. Please try again.',

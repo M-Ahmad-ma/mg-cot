@@ -76,8 +76,6 @@ export const MultiGradeSelectionScreen = () => {
     }
   };
 
-  console.log(isMultiGrade);
-
   const isFormValid = (): boolean => {
     if (selectedGrades.length === 0) return false;
     for (const grade of selectedGrades) {
@@ -150,7 +148,6 @@ export const MultiGradeSelectionScreen = () => {
       startObservation();
       navigation.navigate('MultiGradeForm');
     } catch (error) {
-      console.error('Error adding grades:', error);
       Alert.alert('Error', 'Failed to save grades. Please try again.');
     }
   };
@@ -231,7 +228,7 @@ export const MultiGradeSelectionScreen = () => {
                   <TextInput
                     style={styles.subjectInput}
                     placeholder="Enter subject"
-                    placeholderTextColor={COLORS.textSecondary}
+                    placeholderTextColor="#BDBDBD"
                     value={currentData?.subject || ''}
                     onChangeText={text =>
                       updateGradeData(grade, { subject: text })
@@ -244,7 +241,7 @@ export const MultiGradeSelectionScreen = () => {
                       <TextInput
                         style={styles.attendanceInput}
                         placeholder="Present girls"
-                        placeholderTextColor={COLORS.textSecondary}
+                        placeholderTextColor="#BDBDBD"
                         keyboardType="numeric"
                         value={
                           presentGirls === 0 ? '' : presentGirls.toString()
@@ -259,7 +256,7 @@ export const MultiGradeSelectionScreen = () => {
                       <TextInput
                         style={styles.attendanceInput}
                         placeholder="Present boys"
-                        placeholderTextColor={COLORS.textSecondary}
+                        placeholderTextColor="#BDBDBD"
                         keyboardType="numeric"
                         value={presentBoys === 0 ? '' : presentBoys.toString()}
                         onChangeText={text =>
@@ -274,7 +271,7 @@ export const MultiGradeSelectionScreen = () => {
                     <TextInput
                       style={styles.totalInput}
                       placeholder="Total enrolled"
-                      placeholderTextColor={COLORS.textSecondary}
+                      placeholderTextColor="#BDBDBD"
                       keyboardType="numeric"
                       value={
                         totalStudents === 0 ? '' : totalStudents.toString()

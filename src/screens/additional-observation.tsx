@@ -57,7 +57,7 @@ export const AdditionalObservationScreen = () => {
   const { selectedGrade, selectedGrades, isMultiGrade, resetObservation } =
     useObservation();
   const { endObservation } = useAuth();
-  const { stopTimer, getStartTimeISO } = useTimer();
+  const { stopTimer } = useTimer();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -77,8 +77,7 @@ export const AdditionalObservationScreen = () => {
       } else {
         Alert.alert('Error', result.message || 'Failed to load questions');
       }
-    } catch (error) {
-      console.error('Error fetching questions:', error);
+    } catch {
       Alert.alert('Error', 'Failed to load questions. Please try again.');
     } finally {
       setLoading(false);
@@ -118,8 +117,8 @@ export const AdditionalObservationScreen = () => {
     const gradeNames = isMultiGrade
       ? selectedGrades
       : selectedGrade
-        ? [selectedGrade]
-        : [];
+      ? [selectedGrade]
+      : [];
 
     if (gradeNames.length === 0) {
       Alert.alert('Error', 'No grade selected. Please start over.');
@@ -143,21 +142,28 @@ export const AdditionalObservationScreen = () => {
       if (result.success) {
         const noQuestions = getNoQuestions();
         if (noQuestions.length === 0) {
-          const endTime = new Date().toISOString();
-          const startTime = getStartTimeISO();
-          console.log('Observation completed:', { startTime, endTime });
-
-          stopTimer();
-          await clearObservationState();
-          resetObservation();
-          endObservation();
-          const rootNavigation = navigation.getParent();
-          if (rootNavigation) {
-            rootNavigation.reset({
-              index: 0,
-              routes: [{ name: 'Main' }],
-            });
-          }
+          Alert.alert(
+            'Success',
+            'Additional observations submitted successfully!',
+            [
+              {
+                text: 'OK',
+                onPress: async () => {
+                  stopTimer();
+                  await clearObservationState();
+                  resetObservation();
+                  endObservation();
+                  const rootNavigation = navigation.getParent();
+                  if (rootNavigation) {
+                    rootNavigation.reset({
+                      index: 0,
+                      routes: [{ name: 'Main' }],
+                    });
+                  }
+                },
+              },
+            ],
+          );
         } else {
           navigation.navigate('DiscussionChecklist', {
             noQuestions: noQuestions,
@@ -168,7 +174,7 @@ export const AdditionalObservationScreen = () => {
         Alert.alert(
           'Submission Warning',
           result.message ||
-          'Observation completed but submission failed. Please try again.',
+            'Observation completed but submission failed. Please try again.',
           [
             {
               text: 'Retry',
@@ -181,8 +187,7 @@ export const AdditionalObservationScreen = () => {
           ],
         );
       }
-    } catch (error) {
-      console.error('Error submitting ratings:', error);
+    } catch {
       Alert.alert('Error', 'An unexpected error occurred. Please try again.', [
         {
           text: 'Retry',
@@ -248,7 +253,7 @@ export const AdditionalObservationScreen = () => {
                     style={[
                       styles.binaryButtonText,
                       answers[question.id] === true &&
-                      styles.binaryButtonTextSelected,
+                        styles.binaryButtonTextSelected,
                     ]}
                   >
                     Yes
@@ -265,7 +270,7 @@ export const AdditionalObservationScreen = () => {
                     style={[
                       styles.binaryButtonText,
                       answers[question.id] === false &&
-                      styles.binaryButtonTextSelected,
+                        styles.binaryButtonTextSelected,
                     ]}
                   >
                     No

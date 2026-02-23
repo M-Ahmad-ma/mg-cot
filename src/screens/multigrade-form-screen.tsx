@@ -131,7 +131,7 @@ export const MultiGradeFormScreen = () => {
         setScores(ratingsMap);
       }
     } catch {
-      console.error('Error fetching previous ratings');
+      // Previous ratings fetch failed silently
     }
   }, [selectedGrades]);
 

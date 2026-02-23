@@ -87,11 +87,9 @@ export const ClassroomSelectionScreen = ({
       setIsLoading(true);
 
       // Step 1: Verify school and save school ID
-      console.log('Step 1: Verifying school...');
       const schoolData = await verifySchool(schoolCode.trim());
 
       // Step 2: Start visit with the saved school ID
-      console.log('Step 2: Starting visit...');
       const visitResult = await startVisitWithSavedSchool();
 
       // Check if visit was successful
@@ -100,10 +98,6 @@ export const ClassroomSelectionScreen = ({
       }
 
       // Both steps successful - navigate to next screen
-      console.log('Both API calls successful!');
-      console.log('School Data:', schoolData);
-      console.log('Visit Result:', visitResult);
-
       // Start the observation timer
       startTimer();
 
@@ -114,8 +108,6 @@ export const ClassroomSelectionScreen = ({
       // Navigate to GradeTypeSelection screen within SetupStack
       navigation.navigate('GradeTypeSelection' as never);
     } catch (error: any) {
-      console.error('Error in handleContinue:', error);
-
       // Show appropriate error message
       let errorMessage = error.message || 'An error occurred';
 
@@ -130,9 +122,7 @@ export const ClassroomSelectionScreen = ({
         errorMessage = 'School not found. Please check the school code.';
       }
 
-      Alert.alert('Error', errorMessage, [
-        { text: 'OK', onPress: () => console.log('Alert closed') },
-      ]);
+      Alert.alert('Error', errorMessage, [{ text: 'OK' }]);
     } finally {
       setIsLoading(false);
     }
@@ -150,7 +140,7 @@ export const ClassroomSelectionScreen = ({
         <TextInput
           style={[styles.input, errors.schoolCode && styles.inputError]}
           placeholder="Enter school code"
-          placeholderTextColor={COLORS.textSecondary}
+          placeholderTextColor="#BDBDBD"
           value={schoolCode}
           onChangeText={text => {
             setSchoolCode(text);
@@ -169,7 +159,7 @@ export const ClassroomSelectionScreen = ({
         <TextInput
           style={styles.input}
           placeholder="Enter teacher's CNIC"
-          placeholderTextColor={COLORS.textSecondary}
+          placeholderTextColor="#BDBDBD"
           keyboardType="numeric"
           maxLength={13}
           value={teacherCnic}
@@ -180,7 +170,7 @@ export const ClassroomSelectionScreen = ({
         <TextInput
           style={styles.input}
           placeholder="Enter observer's CNIC"
-          placeholderTextColor={COLORS.textSecondary}
+          placeholderTextColor="#BDBDBD"
           keyboardType="numeric"
           maxLength={13}
           value={observerCnic}

@@ -153,7 +153,6 @@ export const SingleGradeDetailsScreen = () => {
       setIsMultiGrade(false);
       navigation.navigate('ObservationFlow');
     } catch (error) {
-      console.error('Error starting observation:', error);
       Alert.alert('Error', 'Failed to start observation. Please try again.');
     } finally {
       setLoading(false);
@@ -193,7 +192,7 @@ export const SingleGradeDetailsScreen = () => {
             <TextInput
               style={[styles.input, errors.subject && styles.inputError]}
               placeholder="Enter subject (e.g., English, Mathematics)"
-              placeholderTextColor={COLORS.textSecondary}
+              placeholderTextColor="#BDBDBD"
               value={selectedSubject}
               onChangeText={text => {
                 setSelectedSubject(text);
@@ -210,7 +209,7 @@ export const SingleGradeDetailsScreen = () => {
             <TextInput
               style={[styles.input, errors.totalStudents && styles.inputError]}
               placeholder="Enter total students"
-              placeholderTextColor={COLORS.textSecondary}
+              placeholderTextColor="#BDBDBD"
               keyboardType="numeric"
               value={
                 currentGradeData?.total_students
@@ -238,7 +237,7 @@ export const SingleGradeDetailsScreen = () => {
                 errors.girlsAttendance && styles.inputError,
               ]}
               placeholder="Enter girls attendance"
-              placeholderTextColor={COLORS.textSecondary}
+              placeholderTextColor="#BDBDBD"
               keyboardType="numeric"
               value={
                 currentGradeData?.present_girls
@@ -263,7 +262,7 @@ export const SingleGradeDetailsScreen = () => {
             <TextInput
               style={[styles.input, errors.boysAttendance && styles.inputError]}
               placeholder="Enter boys attendance"
-              placeholderTextColor={COLORS.textSecondary}
+              placeholderTextColor="#BDBDBD"
               keyboardType="numeric"
               value={
                 currentGradeData?.present_boys

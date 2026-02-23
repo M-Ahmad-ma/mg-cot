@@ -2,22 +2,19 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_BASE_URL = 'https://pakizabites.com/api';
 const TOKEN_KEY = 'auth_token';
-const SCHOOL_ID_KEY = 'school_id';
+const SCHOOL_ID_KEY = 'school_id';    
 const VISIT_ID_KEY = 'visit_id';
 const OBSERVATION_STATE_KEY = 'observation_state';
 
 const log = {
   info: (tag: string, message: string, data?: any) => {
-    console.log(
-      `[API][${tag}] ${message}`,
-      data ? JSON.stringify(data, null, 2) : '',
-    );
+    // Logging disabled
   },
   error: (tag: string, message: string, error?: any) => {
-    console.error(`[API][${tag}] ${message}`, error || '');
+    // Logging disabled
   },
   warn: (tag: string, message: string, data?: any) => {
-    console.warn(`[API][${tag}] ${message}`, data || '');
+    // Logging disabled
   },
 };
 
@@ -398,8 +395,6 @@ export const getDomainsWithQuestions = async () => {
 
     const data = await response.json();
 
-    console.log('questions:', data);
-
     if (!response.ok) {
       log.error('Domains', 'Failed to fetch domains', data.message);
       throw new Error(data.message || 'Failed to fetch domains');
@@ -431,8 +426,6 @@ export const getDomainWithQuestions = async (domainId: number) => {
     );
 
     const data = await response.json();
-
-    console.log(data);
 
     if (!response.ok) {
       log.error('Domains', `Failed to fetch domain ${domainId}`, data.message);
@@ -633,8 +626,6 @@ export const getPreviousRatings = async (
     );
 
     const responseText = await response.text();
-
-    console.log(responseText);
 
     let parsedResponse;
     try {
@@ -842,8 +833,6 @@ export const getTeacherDiscussionQuestions =
 
       const responseText = await response.text();
 
-      console.log('this is the teacher discussion questions', responseText);
-
       let parsedResponse;
       try {
         parsedResponse = JSON.parse(responseText);
@@ -933,8 +922,6 @@ export const submitTeacherDiscussion = async (
     );
 
     const responseText = await response.text();
-
-    console.log('discussion questions', response);
 
     let parsedResponse;
     try {

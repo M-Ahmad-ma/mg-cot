@@ -57,7 +57,6 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
       setIsLoading(false);
 
       if (result.success) {
-        // Reset observation state before navigating
         navigation.reset({
           index: 0,
           routes: [{ name: 'Main' }],
@@ -81,7 +80,7 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
         <TextInput
           style={styles.input}
           placeholder="CNIC Number"
-          placeholderTextColor={COLORS.textSecondary}
+          placeholderTextColor="#BDBDBD"
           keyboardType="numeric"
           maxLength={13}
           value={cnic}
@@ -92,7 +91,7 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
         <TextInput
           style={styles.input}
           placeholder="Password"
-          placeholderTextColor={COLORS.textSecondary}
+          placeholderTextColor="#BDBDBD"
           secureTextEntry
           value={password}
           onChangeText={setPassword}
@@ -111,14 +110,6 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
         <Text style={styles.helperText}>
           Enter your CNIC and password to access your dashboard
         </Text>
-
-        <View style={styles.dummyCredentials}>
-          <Text style={styles.dummyTitle}>Test Credentials (for testing):</Text>
-          <Text style={styles.dummyText}>CNIC: {TEST_CREDENTIALS.cnic}</Text>
-          <Text style={styles.dummyText}>
-            Password: {TEST_CREDENTIALS.password}
-          </Text>
-        </View>
       </View>
     </View>
   );
