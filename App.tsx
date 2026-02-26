@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   useColorScheme,
   View,
+  ActivityIndicator,
 } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -32,6 +33,7 @@ import {
   TimerProvider,
 } from './src/context';
 import { ObservationTimer } from './src/components/ObservationTimer';
+import { getAndSaveUserLocation } from './src/services/location';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -296,6 +298,24 @@ function RootNavigator() {
 }
 
 function App() {
+  const [locationLoaded, setLocationLoaded] = useState(false);
+
+  useEffect(() => {
+    getAndSaveUserLocation().then(() => {
+      setLocationLoaded(true);
+    });
+  }, []);
+
+  if (!locationLoaded) {
+    return (
+      <SafeAreaProvider>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+        </View>
+      </SafeAreaProvider>
+    );
+  }
+
   return (
     <SafeAreaProvider>
       <ObservationProvider>
@@ -313,6 +333,12 @@ const styles = StyleSheet.create({
   iconContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.background,
   },
 });
 

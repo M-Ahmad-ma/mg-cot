@@ -6,11 +6,13 @@ import {
   TextInput,
   Alert,
   StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
+import { User, Lock, Eye, EyeOff } from 'lucide-react-native';
 
 type LoginScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Login'>;
@@ -36,6 +38,7 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
   const [cnic, setCnic] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const insets = useSafeAreaInsets();
   const { login } = useAuth();
 
@@ -77,34 +80,60 @@ export const LoginScreen = ({ navigation }: LoginScreenProps) => {
         <Text style={styles.loginSubtitle}>Educational Observation System</Text>
 
         <Text style={styles.label}>Enter CNIC</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="CNIC Number"
-          placeholderTextColor="#BDBDBD"
-          keyboardType="numeric"
-          maxLength={13}
-          value={cnic}
-          onChangeText={setCnic}
-        />
+        <View style={styles.inputContainer}>
+          <User
+            size={20}
+            color={COLORS.textSecondary}
+            style={styles.inputIcon}
+          />
+          <TextInput
+            style={[styles.input, styles.inputWithIcon]}
+            placeholder="CNIC Number"
+            placeholderTextColor="#BDBDBD"
+            keyboardType="numeric"
+            maxLength={13}
+            value={cnic}
+            onChangeText={setCnic}
+          />
+        </View>
 
         <Text style={styles.label}>Password</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#BDBDBD"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+        <View style={styles.inputContainer}>
+          <Lock
+            size={20}
+            color={COLORS.textSecondary}
+            style={styles.inputIcon}
+          />
+          <TextInput
+            style={[styles.input, styles.inputWithIcon]}
+            placeholder="Password"
+            placeholderTextColor="#BDBDBD"
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity
+            style={styles.eyeIcon}
+            onPress={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? (
+              <EyeOff size={20} color={COLORS.textSecondary} />
+            ) : (
+              <Eye size={20} color={COLORS.textSecondary} />
+            )}
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity
           style={[styles.primaryButton, isLoading && styles.disabledButton]}
           onPress={handleLogin}
           disabled={isLoading}
         >
-          <Text style={styles.primaryButtonText}>
-            {isLoading ? 'Logging in...' : 'Login'}
-          </Text>
+          {isLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.primaryButtonText}>Login</Text>
+          )}
         </TouchableOpacity>
 
         <Text style={styles.helperText}>
@@ -158,6 +187,27 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     marginBottom: 16,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  inputIcon: {
+    position: 'absolute',
+    left: 12,
+    zIndex: 1,
+    top: 18,
+  },
+  inputWithIcon: {
+    flex: 1,
+    paddingLeft: 44,
+    paddingRight: 44,
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 12,
+    top: 18,
   },
   primaryButton: {
     backgroundColor: COLORS.primary,
