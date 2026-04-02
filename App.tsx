@@ -44,7 +44,10 @@ export type RootStackParamList = {
   ClassroomSelection: undefined;
   SingleGradeDetails: undefined;
   MultiGradeForm: undefined;
-  ObservationScreen: undefined;
+  ObservationScreen: {
+    isMultiGrade: boolean;
+    selectedGrade: string;
+  };
   Observation: undefined;
   ObservationScore: undefined;
   DiscussionChecklist: {
@@ -53,7 +56,10 @@ export type RootStackParamList = {
   };
   AdditionalObservation: undefined;
   Main: undefined;
-  ObservationFlow: undefined;
+  ObservationFlow: {
+    screen?: string;
+    params?: object;
+  };
 };
 
 const Tab = createBottomTabNavigator();

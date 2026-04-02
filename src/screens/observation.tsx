@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 import { useObservation } from '../context';
@@ -23,6 +23,10 @@ import {
   submitRatings,
 } from '../services/api';
 
+type ObservationScreenRouteProp = RouteProp<
+  RootStackParamList,
+  'ObservationScreen'
+>;
 type ObservationScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'ObservationScreen'
@@ -62,13 +66,19 @@ interface GradeDataInfo {
 }
 
 export const ObservationScreen: React.FC = () => {
+  const route = useRoute<ObservationScreenRouteProp>();
+  const { params } = route || {};
+
   const {
-    isMultiGrade,
-    selectedGrade,
+    isMultiGrade: contextIsMultiGrade,
+    selectedGrade: contextSelectedGrade,
     selectedGrades,
     gradeData,
     isLoaded: contextLoaded,
   } = useObservation();
+
+  const isMultiGrade = params?.isMultiGrade ?? contextIsMultiGrade ?? false;
+  const selectedGrade = params?.selectedGrade ?? contextSelectedGrade ?? null;
 
   const { lockObservation } = useAuth();
   const navigation = useNavigation<ObservationScreenNavigationProp>();

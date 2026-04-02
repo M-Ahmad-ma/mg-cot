@@ -1,8 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getAndSaveUserLocation, UserLocation } from './location';
 
-const API_BASE_URL = 'https://pakizabites.com/api';
+const API_BASE_URL = 'http://175.107.59.164/api';
 const TOKEN_KEY = 'auth_token';
-const SCHOOL_ID_KEY = 'school_id';    
+const SCHOOL_ID_KEY = 'school_id';
 const VISIT_ID_KEY = 'visit_id';
 const OBSERVATION_STATE_KEY = 'observation_state';
 
@@ -180,6 +181,15 @@ export const startVisit = async (schoolId: number) => {
 
     log.info('Visit', `Starting visit for school: ${schoolId}`);
 
+    const location: UserLocation | null = await getAndSaveUserLocation();
+
+    const requestBody: any = {};
+
+    if (location) {
+      requestBody.latitude = location.latitude;
+      requestBody.longitude = location.longitude;
+    }
+
     const response = await fetch(
       `${API_BASE_URL}/schools/${schoolId}/start-visit`,
       {
@@ -190,6 +200,7 @@ export const startVisit = async (schoolId: number) => {
           Authorization: `Bearer ${token}`,
           'User-Agent': 'MGCOT-App/1.0',
         },
+        body: JSON.stringify(requestBody),
       },
     );
 

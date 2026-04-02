@@ -64,15 +64,8 @@ export const DiscussionChecklistScreen = () => {
   const [discussed, setDiscussed] = useState<{ [key: number]: boolean }>({});
   const [loading, setLoading] = useState(false);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const backHandler = BackHandler.addEventListener(
-        'hardwareBackPress',
-        () => true,
-      );
-      return () => backHandler.remove();
-    }, []),
-  );
+  const hasAtLeastOneSelected =
+    noQuestions.length > 0 && noQuestions.some(q => discussed[q.id]);
 
   const toggleDiscussed = useCallback((questionId: number) => {
     setDiscussed(prev => ({
@@ -82,6 +75,13 @@ export const DiscussionChecklistScreen = () => {
   }, []);
 
   const handleContinue = async () => {
+    if (noQuestions.length > 0 && !hasAtLeastOneSelected) {
+      Alert.alert(
+        'Selection Required',
+        'Please select at least one item that was discussed with the teacher.',
+      );
+      return;
+    }
     const storedVisitId = await getVisitId();
     const visitId = storedVisitId ? parseInt(storedVisitId, 10) : null;
 
@@ -277,10 +277,10 @@ export const DiscussionChecklistScreen = () => {
         <TouchableOpacity
           style={[
             styles.primaryButton,
-            loading && styles.primaryButtonDisabled,
+            (loading || !hasAtLeastOneSelected) && styles.primaryButtonDisabled,
           ]}
           onPress={handleContinue}
-          disabled={loading}
+          disabled={loading || !hasAtLeastOneSelected}
         >
           <Text style={styles.primaryButtonText}>
             {loading ? 'Submitting...' : 'Complete Observation'}

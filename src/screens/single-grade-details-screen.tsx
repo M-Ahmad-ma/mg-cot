@@ -151,7 +151,13 @@ export const SingleGradeDetailsScreen = () => {
 
       startObservation();
       setIsMultiGrade(false);
-      navigation.navigate('ObservationFlow');
+      navigation.navigate('ObservationFlow', {
+        screen: 'ObservationScreen',
+        params: {
+          isMultiGrade: false,
+          selectedGrade: selectedGrade,
+        },
+      });
     } catch (error) {
       Alert.alert('Error', 'Failed to start observation. Please try again.');
     } finally {
