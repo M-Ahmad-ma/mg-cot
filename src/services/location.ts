@@ -35,17 +35,13 @@ async function requestLocationPermission(): Promise<boolean> {
 export async function getAndSaveUserLocation(): Promise<UserLocation | null> {
   const hasPermission = await requestLocationPermission();
   if (!hasPermission) {
-    console.log('Location permission denied');
     Alert.alert('Permission Denied', 'Location permission is required');
     return null;
   }
 
-  console.log('📍 Getting current position...');
-
   return new Promise(resolve => {
     Geolocation.getCurrentPosition(
       async position => {
-        console.log('📍 Position received:', position.coords); 
         const location: UserLocation = {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
@@ -54,15 +50,13 @@ export async function getAndSaveUserLocation(): Promise<UserLocation | null> {
 
         try {
           await AsyncStorage.setItem(LOCATION_KEY, JSON.stringify(location));
-          console.log('📍 Location saved:', location);
         } catch (error) {
-          console.error('Error saving location:', error);
+          // Silent fail
         }
 
         resolve(location);
       },
       error => {
-        console.error('📍 Error getting location:', error.code, error.message);
         if (error.code === 1) {
           Alert.alert(
             'Permission Denied',
@@ -90,7 +84,6 @@ export async function getSavedLocation(): Promise<UserLocation | null> {
     }
     return null;
   } catch (error) {
-    console.error('Error getting saved location:', error);
     return null;
   }
 }

@@ -809,6 +809,7 @@ export interface SubmitTeacherDiscussionRequest {
   responses: {
     question_id: number;
     response: boolean;
+    message?: string;
   }[];
 }
 

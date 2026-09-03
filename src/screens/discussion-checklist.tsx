@@ -8,6 +8,7 @@ import {
   Alert,
   ActivityIndicator,
   BackHandler,
+  TextInput,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -62,10 +63,15 @@ export const DiscussionChecklistScreen = () => {
 
   const [noQuestions] = useState<NoQuestion[]>(initialNoQuestions || []);
   const [discussed, setDiscussed] = useState<{ [key: number]: boolean }>({});
+  const [messages, setMessages] = useState<{ [key: number]: string }>({});
   const [loading, setLoading] = useState(false);
 
   const hasAtLeastOneSelected =
-    noQuestions.length > 0 && noQuestions.some(q => discussed[q.id]);
+    noQuestions.length > 0 && noQuestions.every(q => discussed[q.id]);
+
+  const hasAllMessages =
+    noQuestions.length > 0 &&
+    noQuestions.every(q => discussed[q.id] && messages[q.id]?.trim());
 
   const toggleDiscussed = useCallback((questionId: number) => {
     setDiscussed(prev => ({
@@ -79,6 +85,14 @@ export const DiscussionChecklistScreen = () => {
       Alert.alert(
         'Selection Required',
         'Please select at least one item that was discussed with the teacher.',
+      );
+      return;
+    }
+
+    if (!hasAllMessages) {
+      Alert.alert(
+        'Message Required',
+        'Please enter a message for each item that was discussed with the teacher.',
       );
       return;
     }
@@ -96,6 +110,7 @@ export const DiscussionChecklistScreen = () => {
       const responses = noQuestions.map(q => ({
         question_id: q.id,
         response: discussed[q.id] || false,
+        message: messages[q.id]?.trim() || undefined,
       }));
 
       const result = await submitTeacherDiscussion(visitId, { responses });
@@ -136,7 +151,7 @@ export const DiscussionChecklistScreen = () => {
           ],
         );
       }
-    } catch {
+    } catch (error) {
       Alert.alert(
         'Error',
         'An unexpected error occurred. Do you want to continue anyway?',
@@ -243,44 +258,62 @@ export const DiscussionChecklistScreen = () => {
 
         {!loading &&
           noQuestions.map((question, index) => (
-            <TouchableOpacity
-              key={question.id || index}
-              style={[
-                styles.checklistCard,
-                discussed[question.id] && styles.checklistCardDiscussed,
-              ]}
-              onPress={() => toggleDiscussed(question.id)}
-            >
-              <View style={styles.checklistRow}>
-                <Text
-                  style={[
-                    styles.checklistText,
-                    discussed[question.id] && styles.checklistTextDiscussed,
-                  ]}
-                >
-                  {question.question}
-                </Text>
-                <View
-                  style={[
-                    styles.checkbox,
-                    discussed[question.id] && styles.checkboxChecked,
-                  ]}
-                >
-                  {discussed[question.id] && (
-                    <Text style={styles.checkboxCheck}>✓</Text>
-                  )}
+            <View key={question.id || index}>
+              <TouchableOpacity
+                style={[
+                  styles.checklistCard,
+                  discussed[question.id] && styles.checklistCardDiscussed,
+                ]}
+                onPress={() => toggleDiscussed(question.id)}
+              >
+                <View style={styles.checklistRow}>
+                  <Text
+                    style={[
+                      styles.checklistText,
+                      discussed[question.id] && styles.checklistTextDiscussed,
+                    ]}
+                  >
+                    {question.question}
+                  </Text>
+                  <View
+                    style={[
+                      styles.checkbox,
+                      discussed[question.id] && styles.checkboxChecked,
+                    ]}
+                  >
+                    {discussed[question.id] && (
+                      <Text style={styles.checkboxCheck}>✓</Text>
+                    )}
+                  </View>
                 </View>
-              </View>
-            </TouchableOpacity>
+              </TouchableOpacity>
+              {discussed[question.id] && (
+                <View style={styles.messageInputContainer}>
+                  <Text style={styles.messageLabel}>Message (Required)</Text>
+                  <TextInput
+                    style={styles.messageInput}
+                    placeholder="Enter discussion notes..."
+                    placeholderTextColor="#BDBDBD"
+                    multiline
+                    numberOfLines={3}
+                    value={messages[question.id] || ''}
+                    onChangeText={text =>
+                      setMessages(prev => ({ ...prev, [question.id]: text }))
+                    }
+                  />
+                </View>
+              )}
+            </View>
           ))}
 
         <TouchableOpacity
           style={[
             styles.primaryButton,
-            (loading || !hasAtLeastOneSelected) && styles.primaryButtonDisabled,
+            (loading || !hasAtLeastOneSelected || !hasAllMessages) &&
+              styles.primaryButtonDisabled,
           ]}
           onPress={handleContinue}
-          disabled={loading || !hasAtLeastOneSelected}
+          disabled={loading || !hasAtLeastOneSelected || !hasAllMessages}
         >
           <Text style={styles.primaryButtonText}>
             {loading ? 'Submitting...' : 'Complete Observation'}
@@ -356,6 +389,36 @@ const styles = StyleSheet.create({
   checklistCardDiscussed: {
     backgroundColor: COLORS.primaryLight,
     borderColor: COLORS.primary,
+  },
+  messageInputContainer: {
+    marginTop: -8,
+    marginBottom: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    backgroundColor: COLORS.primaryLight,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+  },
+  messageLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.primary,
+    marginBottom: 8,
+  },
+  messageInput: {
+    backgroundColor: COLORS.card,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: COLORS.text,
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  messageInputError: {
+    borderColor: COLORS.error,
   },
   checklistRow: {
     flexDirection: 'row',
