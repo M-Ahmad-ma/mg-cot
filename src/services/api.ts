@@ -37,6 +37,19 @@ export const getVisitId = async (): Promise<string | null> => {
   }
 };
 
+export const getSchoolHistory = async (schoolId: number) => {
+  let response = await fetch(`${API_BASE_URL}/schools/${schoolId}/visit-history`)
+  try {
+    if (response.ok) {
+      let data = await response.json()
+      return data
+    }
+  } catch (e) {
+    log.error("Error", "check the logs", e)
+  }
+
+}
+
 export const clearVisitId = async () => {
   try {
     await AsyncStorage.removeItem(VISIT_ID_KEY);
@@ -665,8 +678,8 @@ export const getPreviousRatings = async (
     const ratings =
       typeof parsedResponse === 'object' && parsedResponse !== null
         ? parsedResponse.data?.previous_ratings ||
-          parsedResponse.previous_ratings ||
-          []
+        parsedResponse.previous_ratings ||
+        []
         : [];
 
     log.info('Ratings', `Fetched ${ratings.length} previous ratings`);

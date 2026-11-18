@@ -1,4 +1,4 @@
-package com.mgcot
+package com.mgcot.kp
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

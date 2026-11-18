@@ -17,6 +17,10 @@ import {
   verifySchool,
   startVisitWithSavedSchool,
   clearObservationState,
+  getSchoolId,
+  getSchoolHistory,
+  getSchoolHistory,
+  getSchoolHistory,
 } from '../services/api';
 import { callResetObservationState } from '../context/ObservationContext';
 import { useTimer } from '../context/TimerContext';
